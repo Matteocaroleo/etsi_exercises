@@ -1,0 +1,5 @@
+#define N_OF_SAMPLES 200
+#define SAMPLING_FREQUENCY 1000
+#define FILTER_RS
+//#define FILTER_RMA
+#define QUANT_4_BIT
