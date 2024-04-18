@@ -1,4 +1,4 @@
-#define EX1
+//#define EX1
 #ifdef EX1
 /*  This sketch is used to sample a signal with a 
     depth of 10 bit (original arduino). The sampling
