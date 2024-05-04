@@ -9,8 +9,10 @@ samplingRate = 1/samplingFrequency
 
 #Creates discrete time for when to calculate function
 t = np.arange (0.0, 1.0, samplingRate)
-frequency = [50, 800, 1600, 2400, 3200]
-coeff = [0.9, 0.5, 0.35, 0.2, 0.1]
+
+#is a C4 Maj9 chord 
+frequency = [261.63, 329.63, 392.00, 493.88, 587.33]
+coeff = [0.9, 0.5, 0.7, 0.55, 0.65]
 result = 0
 for x in range (5):
     result = result + coeff[x]*np.sin(2*np.pi *frequency[x]*t) 
@@ -20,10 +22,10 @@ signal = (result)
 plt.figure (figsize = (13, 7))
 
 #time is in milliseconds
-plt.xlim (0, 400)
+plt.xlim (0, 770)
 
-plt.title ("Waveform 1")
-plt.xlabel ("time [ms]")
+plt.title ("Waveform 1 (C4Maj9)")
+plt.xlabel ("Samples")
 plt.ylabel ("amplitude")
 plt.plot (signal)
 plt.grid()
@@ -44,5 +46,5 @@ plt.xticks(frequency)
 plt.plot (np.abs(resultDft), linewidth = 2)
 plt.xlabel('Freq (Hz)')
 plt.ylabel('FFT Amplitude') 
-plt.xlim(0, 4000)
+plt.xlim(0, frequency [4] + 100)
 plt.show()
