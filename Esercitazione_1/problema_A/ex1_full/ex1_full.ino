@@ -8,11 +8,11 @@
       - Filter a signal with running sum algorithm
       - Filter a signal with recursive moving average algorithm.
     
-    If ex1_config.h is left untouched, the sketch will 
-      - plot the input signal with depth of 10 bit
-      - plot the input signal with both depth of 8 and 4 bit
-      - plot the input quantized signals with RMA filtering
-    the sketch will gather N_OF_SAMPLES sample.
+      If ex1_config.h is left untouched, the sketch will 
+        - plot the input signal with depth of 10 bit
+        - plot the input signal with both depth of 8 and 4 bit
+        - plot the input quantized signals with RMA filtering
+      the sketch will gather N_OF_SAMPLES sample.
 
     The extensive use of the preprocessor directives has been used
     for maximizing memory usage while keeping all in a couple of files.

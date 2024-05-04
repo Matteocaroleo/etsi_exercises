@@ -15,7 +15,7 @@
 
 //EX_FULL configuration defines requested in assignment. It uses RMA as a low-pass filter 
 //////////////////////////////////////////////////////////////////
-//#define EX_FULL
+#define EX_FULL
 #ifdef EX_FULL
   //the undef are used to reset macros to wanted values
   #undef FILTER_RS
@@ -41,7 +41,7 @@
 
 //USED FOR RUNNING THE TEST ROUTINE: uncomment line below for usage
 ////////////////////////////////////////////////////////////////////////// 
-#define TEST
+//#define TEST
 #ifdef TEST
   #undef EX1_FULL
   #undef QUANT_4_BIT 
