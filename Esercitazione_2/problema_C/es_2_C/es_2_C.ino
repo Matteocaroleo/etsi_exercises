@@ -1,3 +1,15 @@
+/*
+Matteo Caroleo S5216938
+  This sketch computes and plot sdft and fft of generated signal and compares them.
+  The sketch can generate 3 waveforms , which are all 5-notes chords, one can
+  be selected at a time in the "SETTINGS" section in the config.h.
+  
+  The dft is calculated by the definition given in class, the fft
+  is calculated using a library. The time took using each algorithm 
+  is shown in the serial monitor at the end of operation. The graphs of
+  FFT and DFT are shown in the serial plotter.
+*/
+
 #include "ex_2_C_config.h"
 #include "arduinoFFT.h"
 
@@ -7,13 +19,20 @@ double real_arr [N_OF_SAMPLES];
 double imaginary_arr [N_OF_SAMPLES];
 
 //labels for the serial plotter
-char label0 [3] = {'S','I','G'};
+#ifdef WAVEFORM_1
+  char label0 [3] = {'W','F','1'};
+#elif defined (WAVEFORM_2)
+  char label0 [3] = {'W','F','2'};
+#else 
+  char label0 [3] = {'W','F','3'};
+#endif
+
 char label1 [3] = {'D','F','T'};
 char label2 [3] = {'F','F','T'};
 
 // The frequencies, when played together, form a C4 Maj9 chord. 
 #ifdef WAVEFORM_1
-  double frequency [5] = {261.63, 329.63, 392.00, 493.88, 587.33};
+  double frequency [5] = {261.63, 329.63, 392.00, 493.88, 557.33};
 #endif  //WAVEFORM_1
 
 //It's a D4 min9 chord
@@ -28,17 +47,18 @@ char label2 [3] = {'F','F','T'};
 
 
 unsigned long microseconds = 0;
-unsigned long elapsed_time = 0;
+unsigned long elapsed_time_dft = 0;
+unsigned long elapsed_time_fft = 0;
 unsigned int sampling_period_us = 0;
 
 void Generate_signal (double* sig_arr_out, unsigned int sampling_period_us) ;
 void Plot_signal (double* sig_src_arr, int sig_length, char* label, int lenght_of_label);
+void Plot_two_signals_overlapped (double* dft_sig, double* fft_sig, int lenght_of_sigs);
 void calc_sig_dft(double* sig_src_arr, double* sig_dest_rex_arr, double* sig_dest_imx_arr, uint32_t sig_length);
 void get_dft_output_mag (double* REX, double* IMX);
 float Mean_square_error (double* first_arr, double* second_arr, int lenght);
-//int Check_if_same (double* first_arr, double* second_arr, int lenght);
 
-//SHOULD MAYBE PLOT SIGNAL ONE OVER OTHER
+
 void setup() {
   Serial.begin (9600);
   sampling_period_us = round(1.0e6*(1.0/SAMPLING_FREQUENCY));
@@ -47,23 +67,20 @@ void setup() {
   Generate_signal (signal, sampling_period_us);
   Plot_signal (signal, N_OF_SAMPLES, label0, 3);
 
-  //calculates dft
+  //calculates dft by definition
   microseconds = micros();  //starts counter
   calc_sig_dft (signal, real_arr, imaginary_arr, N_OF_SAMPLES);
   get_dft_output_mag (real_arr, imaginary_arr);
-  elapsed_time = micros() - microseconds; //stops counter
-  Plot_signal (real_arr, N_OF_SAMPLES/2, label1, 3);
+  elapsed_time_dft = micros() - microseconds; //stops counter
+  #ifndef PLOT_OVERLAPPED
+    Plot_signal (real_arr, N_OF_SAMPLES/2, label1, 3);
+    delay (1000);
+  #endif
 
-  //prints counter to serial
-  Serial.print ("ELAPSED TIME (s): ");
-  Serial.println (elapsed_time / 1.0e6);
-  delay (1000);
-  //calculates dft with libraries
-  
-  //setup: clears used arrays
+  //calculates dft with libraries 
+  //setup: clears used array
   for (int i = 0; i < N_OF_SAMPLES/2; i++){
     imaginary_arr[i] = 0;
-    //real_arr[i] = 0;
   }
 
   Serial.println ("FFT WITH LIBRARY: ");
@@ -71,19 +88,21 @@ void setup() {
   arduinoFFT FFT = arduinoFFT();
   FFT.Compute(signal, imaginary_arr, N_OF_SAMPLES, FFT_FORWARD); /* Compute FFT */
   FFT.ComplexToMagnitude(signal, imaginary_arr, N_OF_SAMPLES);
-  elapsed_time = micros() - microseconds;
+  elapsed_time_fft = micros() - microseconds;
   
-  Plot_signal (signal, N_OF_SAMPLES/2, label2, 3);
-  Serial.print ("ELAPSED TIME (s): ");
-  Serial.println (elapsed_time/1.0e6);
-  /*if (Check_if_same (signal, real_arr, N_OF_SAMPLES) == true){
-    Serial.println ("DFT & FFT ARE THE SAME");
-  }
-  else{
-    Serial.println ("DFT & FFT ARE NOT THE SAME");
-  }
-  */
-  //Serial.println (Check_if_same (signal, real_arr, N_OF_SAMPLES/2));
+  #ifdef PLOT_OVERLAPPED
+    Plot_two_signals_overlapped (real_arr, signal, N_OF_SAMPLES/2);
+  #else
+    Plot_signal (signal, N_OF_SAMPLES/2, label2, 3);
+  #endif //PLOT
+
+  //timers print
+  Serial.println("********DATA**********");
+  Serial.print ("ELAPSED TIME DFT (s): ");
+  Serial.println (elapsed_time_dft / 1.0e6);
+  Serial.print ("ELAPSED TIME FFT (s): ");
+  Serial.println (elapsed_time_fft/1.0e6);
+
   Serial.print ("MEAN SQUARE ERROR BETWEEN DFT & FFT: ");
   Serial.println (Mean_square_error (signal, real_arr, N_OF_SAMPLES/2));
 
@@ -107,6 +126,19 @@ void Generate_signal (double* signal, unsigned int sampling_period_us){
   return;
 }
 
+void Plot_two_signals_overlapped (double* dft_sig, double* fft_sig, int lenght_of_sigs){
+  for (int i = 0; i < lenght_of_sigs; i++){
+    Serial.print ("DFT:");
+    Serial.print (dft_sig [i]);
+    Serial.print ("\t");
+    Serial.print ("FFT:");
+    Serial.print (fft_sig [i]);
+    Serial.println();
+  }
+
+  Serial.println ();
+}
+
 void Plot_signal (double* sig_src_arr, int sig_length, char* label, int lenght_of_label){
   for (int i = 0; i < sig_length; i++){
     for (int j = 0; j < lenght_of_label; j++){
@@ -120,24 +152,24 @@ void Plot_signal (double* sig_src_arr, int sig_length, char* label, int lenght_o
 
 void calc_sig_dft(double* sig_src_arr, double* sig_dest_rex_arr, double* sig_dest_imx_arr, uint32_t sig_length){
   int i,k,j;
-  for(j=0;j<(sig_length/2);j++){
-    sig_dest_rex_arr[j] =0;
-    sig_dest_imx_arr[j] =0;
+  for(j=0; j < (sig_length/2); j++){
+    sig_dest_rex_arr[j] = 0;
+    sig_dest_imx_arr[j] = 0;
   }
   
-   for(k=0;k<(sig_length/2);k++) {
-    for(i=0;i<sig_length;i++){
-       sig_dest_rex_arr[k] =  sig_dest_rex_arr[k] + sig_src_arr[i]*cos(2*PI*k*i/sig_length);
-       sig_dest_imx_arr[k] =  sig_dest_imx_arr[k] - sig_src_arr[i]*sin(2*PI*k*i/sig_length);
+   for(k=0; k < (sig_length/2); k++) {
+    for(i=0; i < sig_length; i++){
+       sig_dest_rex_arr[k] = sig_dest_rex_arr[k] + sig_src_arr[i]*cos(2*PI*k*i/sig_length);
+       sig_dest_imx_arr[k] = sig_dest_imx_arr[k] - sig_src_arr[i]*sin(2*PI*k*i/sig_length);
     }
   }
 }
 
 void get_dft_output_mag(double* REX, double* IMX){
   uint32_t k;
-  for(k=0;k<N_OF_SAMPLES/2;k++)
+  for(k=0; k<N_OF_SAMPLES/2; k++)
   {
-    REX[k] = sqrt(pow(REX[k],2)+pow(IMX[k],2));
+    REX[k] = sqrt(pow(REX[k], 2)+pow(IMX[k], 2));
   }
 }
 
@@ -150,17 +182,4 @@ float Mean_square_error (double* first_arr, double* second_arr, int lenght){
  //mean
  return acc / lenght;
 }
-
-int Check_if_same (double* first_arr, double* second_arr, int lenght){
-  //bool flag = true;
-  int flag = -1;
-  for (int i = 0; i < lenght; i++){
-    if (first_arr[i] != second_arr[i]){
-      flag= i;
-      break;
-    }
-  }
-  return flag;
-}
-
 
