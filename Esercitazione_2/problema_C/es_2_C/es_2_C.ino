@@ -11,7 +11,7 @@ Matteo Caroleo S5216938
 */
 
 #include "ex_2_C_config.h"
-#include "arduinoFFT.h"
+#include "arduinoFFT.h" /* USE VERSION 1.6.2 OR LOWER */
 
 double coefficients [5] = {0.9, 0.5, 0.7, 0.55, 0.65};
 double signal [N_OF_SAMPLES] = {0};
