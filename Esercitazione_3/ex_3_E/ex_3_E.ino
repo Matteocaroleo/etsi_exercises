@@ -31,9 +31,6 @@ unsigned long microseconds;
 
 void Plot_two_signals_overlapped (float* first_sig, float* second_sig, int lenght_of_sigs);
 
-//LEVARE I COEFFICIENTI CABLATI
-//BETA CABLATO DENTRO
-//ALFA CUNFIONE DI CAMPIONAMENTO E FREQU DI TAGLIO
 void setup() {
   Serial.begin (9600);
   ///////////////////////////////////////////////////////
@@ -58,9 +55,7 @@ void setup() {
 
 ///////////////////////////////////////////////////////
 
-#else
-  /////////////////////////////
-  
+#else  
   //SAMPLING 
   microseconds = 0;
   // samples input signal with 10 bit depth and with given sampling frequency
@@ -82,13 +77,13 @@ void setup() {
 
   Plot_two_signals_overlapped (sig_src_arr, sig_out_arr, N_OF_SAMPLES);
 
-  /////////////////////////////
- #endif //TEST  
+  
+ #endif   
 }
 
 
 void loop() {
-  
+  //
 }
 
 void Plot_two_signals_overlapped (float* first_sig, float* second_sig, int lenght_of_sigs){
@@ -118,10 +113,6 @@ void Butterworth_first_order (float* sig_src_arr, float* sig_out_arr, float cuto
   }
 }
 
-
- 
-
-
 void Butterworth_second_order (float* sig_src_arr, float* sig_out_arr, float cutoff_frequency){
     float beta0 = 1;
     float beta1 = sqrt(2);
@@ -141,6 +132,7 @@ void Butterworth_second_order (float* sig_src_arr, float* sig_out_arr, float cut
     }  
 }
 
+//////////////___ERROR_CHECKING____////////////////////
 #if defined (BUTTERWORTH_FIRST_ORDER) && defined (BUTTERWORTH_SECOND_ORDER)
   #error CANNOT DEFINE BOTH FILTERS: SELECT ONLY ONE
 #endif
